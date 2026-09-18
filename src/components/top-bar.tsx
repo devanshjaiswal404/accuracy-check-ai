@@ -64,7 +64,7 @@ export function TopBar() {
               <Link
                 key={tab.id}
                 to={tab.to}
-                activeOptions={tab.exact ? { exact: true } : undefined}
+                activeOptions={tab.exact ? { exact: true } : {}}
                 className={cn(
                   "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                   active === tab.id

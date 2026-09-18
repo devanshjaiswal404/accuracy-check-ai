@@ -25,8 +25,8 @@ export interface ClauseCheck {
   status: CheckStatus;
   severity: "HIGH" | "MEDIUM" | "LOW";
   detail: string;
-  extracted?: string;
-  remediation?: string;
+  extracted?: string | undefined;
+  remediation?: string | undefined;
 }
 
 export interface BoundingBox {
@@ -165,14 +165,17 @@ export function customPack(): PackInput {
 
 function parseAmount(s: string): number | null {
   const m = s.match(/(\d+(?:\.\d+)?)/);
-  return m ? parseFloat(m[1]) : null;
+  const num = m?.[1];
+  return num ? parseFloat(num) : null;
 }
 
 /** grams (or millilitres) of the declared net quantity */
 function parseQtyGrams(qty: string): { value: number; unit: string } | null {
   const m = qty.trim().match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z.]+)$/);
-  if (!m) return null;
-  return { value: parseFloat(m[1]), unit: m[2].replace(/\.$/, "").toLowerCase() };
+  const num = m?.[1];
+  const unitRaw = m?.[2];
+  if (!num || !unitRaw) return null;
+  return { value: parseFloat(num), unit: unitRaw.replace(/\.$/, "").toLowerCase() };
 }
 
 export function analyze(input: PackInput): ClauseCheck[] {
