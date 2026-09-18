@@ -8,16 +8,21 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { LanguageProvider } from "@/lib/i18n";
+import { TopBar } from "@/components/top-bar";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h1 className="font-display text-7xl font-bold text-foreground">404</h1>
+        <h2 className="mt-4 font-display text-xl font-semibold uppercase tracking-widest text-foreground">
+          Record not found
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
         </p>
@@ -42,9 +47,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+        <h1 className="font-display text-xl font-semibold uppercase tracking-widest text-foreground">
           This page didn't load
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -60,12 +65,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             Try again
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
           >
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -77,20 +82,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "MetrologyCheck AI — Legal Metrology Division" },
+      {
+        name: "description",
+        content:
+          "Legal Metrology (Packaged Commodities) Rules 2011 compliance inspection platform for enforcement officers.",
+      },
+      { property: "og:title", content: "MetrologyCheck AI — Legal Metrology Division" },
+      {
+        property: "og:description",
+        content:
+          "Statutory pack-label audits under the LMPC Rules 2011: clause checklist, violation tagging, registry and PDF notices.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "MetrologyCheck AI — Legal Metrology Division" },
+      {
+        name: "twitter:description",
+        content:
+          "Legal Metrology (Packaged Commodities) Rules 2011 compliance inspection platform for enforcement officers.",
+      },
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: appCss,
+        href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
       },
+      { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
@@ -119,8 +139,18 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <LanguageProvider>
+        <div className="flex min-h-screen flex-col bg-background">
+          <TopBar />
+          <main className="flex-1">
+            <Outlet />
+          </main>
+          <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground">
+            MetrologyCheck AI · Packaged Commodities (LMPC) Rules, 2011 · For enforcement use only
+          </footer>
+        </div>
+        <Toaster theme="dark" position="bottom-right" />
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }
