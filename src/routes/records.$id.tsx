@@ -7,10 +7,8 @@ import type { AuditStatus } from "@/lib/metrology";
 import { buildNoticePdf } from "@/lib/pdf";
 
 export const Route = createFileRoute("/records/$id")({
-  head: ({ match }) => {
-    const name =
-      (match.loaderData as { product: { product_name: string } | null } | null | undefined)?.product
-        ?.product_name ?? "Inspection Audit";
+  head: ({ loaderData }) => {
+    const name = loaderData?.product?.product_name ?? "Inspection Audit";
     return {
       meta: [
         { title: `MetrologyCheck AI — ${name}` },
