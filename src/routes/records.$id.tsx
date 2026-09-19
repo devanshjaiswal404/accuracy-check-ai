@@ -10,12 +10,12 @@ export const Route = createFileRoute("/records/$id")({
   head: () => {
     return {
       meta: [
-        { title: `MetrologyCheck AI — ${name}` },
+        { title: "MetrologyCheck AI — Inspection Audit" },
         {
           name: "description",
           content: "Statutory audit record with clause-level violations, extracted text and remediation.",
         },
-        { property: "og:title", content: `MetrologyCheck AI — ${name}` },
+        { property: "og:title", content: "MetrologyCheck AI — Inspection Audit" },
         {
           property: "og:description",
           content: "Statutory audit record with clause-level violations, extracted text and remediation.",
