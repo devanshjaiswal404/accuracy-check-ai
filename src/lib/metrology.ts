@@ -43,7 +43,7 @@ export interface BoundingBox {
 interface Sample {
   image: string;
   input: PackInput;
-  mock: Record<Exclude<ImageTab, "front">, string[]>;
+  mock: Record<ImageTab, string[]>;
   boxes: Record<ImageTab, BoundingBox[]>;
 }
 
@@ -63,6 +63,7 @@ export const SAMPLES: Record<"atta" | "biscuit", Sample> = {
       grievancePhone: "1800-419-0024",
     },
     mock: {
+      front: [],
       back: [
         "Marketed by: Shakti Foods Ltd.",
         "Plot 3, Okhla Industrial Area Phase II,",
@@ -114,6 +115,7 @@ export const SAMPLES: Record<"atta" | "biscuit", Sample> = {
       grievancePhone: "1800-262-2233",
     },
     mock: {
+      front: [],
       back: [
         "Mfd. by: BakeWell Foods Pvt. Ltd.",
         "14 MIDC Andheri East, Mumbai - 400093",

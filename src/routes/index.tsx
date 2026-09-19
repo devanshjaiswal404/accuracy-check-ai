@@ -136,7 +136,7 @@ function Index() {
       productName: string;
       brand: string;
       category: string;
-      imageUrl?: string;
+      imageUrl?: string | undefined;
       status: string;
       violations: ClauseCheck[];
     }) =>
