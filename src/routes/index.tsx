@@ -47,7 +47,7 @@ export const Route = createFileRoute("/")({
         content: "Capture pack evidence, run the clause-by-clause LMPC 2011 audit and export an official notice.",
       },
       { property: "og:type", content: "website" },
-ript>    ],
+    ],
   }),
   component: Index,
 });
