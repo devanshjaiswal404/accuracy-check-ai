@@ -99,7 +99,13 @@ function AuditDetail() {
                 category: product.category ?? "",
                 status,
                 officer: "Officer Devansh · Zone 1",
-                violations,
+                violations: violations.map((v) => ({
+                  clause: v.rule_clause,
+                  title: v.violation_title,
+                  severity: (v.severity as NoticeSeverity | null) ?? undefined,
+                  extractedText: v.extracted_text ?? undefined,
+                  remediation: v.remediation ?? undefined,
+                })),
               })
             }
             className="inline-flex items-center gap-2 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
