@@ -25,7 +25,10 @@ export const Route = createFileRoute("/records/$id")({
       ],
     };
   },
-  loader: ({ params }) => getInspection({ data: { id: params.id } }),
+  loader: async ({ params }) => {
+    const result = await getInspection({ data: { id: params.id } });
+    return result;
+  },
   component: AuditDetail,
   notFoundComponent: () => <NotFoundBody />,
   errorComponent: () => <NotFoundBody />,
