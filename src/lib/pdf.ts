@@ -3,9 +3,9 @@ import { jsPDF } from "jspdf";
 export interface NoticeViolation {
   clause: string;
   title: string;
-  severity?: string | null;
-  extracted?: string | null;
-  remediation?: string | null;
+  severity?: string | null | undefined;
+  extracted?: string | null | undefined;
+  remediation?: string | null | undefined;
 }
 
 export interface NoticeData {

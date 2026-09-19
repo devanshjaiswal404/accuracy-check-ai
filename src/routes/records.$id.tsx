@@ -7,18 +7,15 @@ import type { AuditStatus } from "@/lib/metrology";
 import { buildNoticePdf } from "@/lib/pdf";
 
 export const Route = createFileRoute("/records/$id")({
-  head: ({ match }) => {
-    const name =
-      (match.loaderData as { product: { product_name: string } | null } | null | undefined)?.product
-        ?.product_name ?? "Inspection Audit";
+  head: () => {
     return {
       meta: [
-        { title: `MetrologyCheck AI — ${name}` },
+        { title: "MetrologyCheck AI — Inspection Audit" },
         {
           name: "description",
           content: "Statutory audit record with clause-level violations, extracted text and remediation.",
         },
-        { property: "og:title", content: `MetrologyCheck AI — ${name}` },
+        { property: "og:title", content: "MetrologyCheck AI — Inspection Audit" },
         {
           property: "og:description",
           content: "Statutory audit record with clause-level violations, extracted text and remediation.",
@@ -27,7 +24,10 @@ export const Route = createFileRoute("/records/$id")({
       ],
     };
   },
-  loader: ({ params }) => getInspection({ data: { id: params.id } }),
+  loader: async ({ params }) => {
+    const result = await getInspection({ data: { id: params.id } });
+    return result;
+  },
   component: AuditDetail,
   notFoundComponent: () => <NotFoundBody />,
   errorComponent: () => <NotFoundBody />,
@@ -99,7 +99,13 @@ function AuditDetail() {
                 category: product.category ?? "",
                 status,
                 officer: "Officer Devansh · Zone 1",
-                violations,
+                violations: violations.map((v) => ({
+                  clause: v.rule_clause,
+                  title: v.violation_title,
+                  severity: v.severity,
+                  extractedText: v.extracted_text ?? undefined,
+                  remediation: v.remediation ?? undefined,
+                })),
               })
             }
             className="inline-flex items-center gap-2 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
