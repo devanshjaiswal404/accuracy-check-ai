@@ -102,7 +102,7 @@ function AuditDetail() {
                 violations: violations.map((v) => ({
                   clause: v.rule_clause,
                   title: v.violation_title,
-                  severity: (v.severity as NoticeSeverity | null) ?? undefined,
+                  severity: v.severity,
                   extractedText: v.extracted_text ?? undefined,
                   remediation: v.remediation ?? undefined,
                 })),
