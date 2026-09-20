@@ -145,7 +145,7 @@ function RootComponent() {
           <main className="flex-1">
             <Outlet />
           </main>
-          <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground">
+          <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-4 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors">
             MetrologyCheck AI · Packaged Commodities (LMPC) Rules, 2011 · For enforcement use only
           </footer>
         </div>

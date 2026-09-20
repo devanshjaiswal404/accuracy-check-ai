@@ -4,10 +4,17 @@ import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 
 function getPublicClient() {
-  const url = process.env["SUPABASE_URL"] ?? process.env["VITE_SUPABASE_URL"];
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
-  if (!url || !key) throw new Error("Supabase is not configured");
-  return createClient<Database>(url, key, {
+  const url = process.env["SUPABASE_URL"] ?? process.env["VITE_SUPABASE_URL"] ?? "";
+  const key =
+    process.env["SUPABASE_PUBLISHABLE_KEY"] ??
+    process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ??
+    process.env["SUPABASE_ANON_KEY"] ??
+    process.env["VITE_SUPABASE_ANON_KEY"] ??
+    "";
+  if (!url || !key) {
+    console.warn("Supabase is not configured on server");
+  }
+  return createClient<Database>(url || "https://placeholder.supabase.co", key || "placeholder-key", {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
