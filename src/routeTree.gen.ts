@@ -10,12 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CertificateRouteImport } from './routes/certificate'
 import { Route as RecordsRouteImport } from './routes/records'
 import { Route as RecordsIdRouteImport } from './routes/records.$id'
+import { Route as VerifyIdRouteImport } from './routes/verify.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CertificateRoute = CertificateRouteImport.update({
+  id: '/certificate',
+  path: '/certificate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecordsRoute = RecordsRouteImport.update({
@@ -28,34 +35,53 @@ const RecordsIdRoute = RecordsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => RecordsRoute,
 } as any)
+const VerifyIdRoute = VerifyIdRouteImport.update({
+  id: '/verify/$id',
+  path: '/verify/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/certificate': typeof CertificateRoute
   '/records': typeof RecordsRouteWithChildren
   '/records/$id': typeof RecordsIdRoute
+  '/verify/$id': typeof VerifyIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/certificate': typeof CertificateRoute
   '/records': typeof RecordsRouteWithChildren
   '/records/$id': typeof RecordsIdRoute
+  '/verify/$id': typeof VerifyIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/certificate': typeof CertificateRoute
   '/records': typeof RecordsRouteWithChildren
   '/records/$id': typeof RecordsIdRoute
+  '/verify/$id': typeof VerifyIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/records' | '/records/$id'
+  fullPaths: '/' | '/certificate' | '/records' | '/records/$id' | '/verify/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/records' | '/records/$id'
-  id: '__root__' | '/' | '/records' | '/records/$id'
+  to: '/' | '/certificate' | '/records' | '/records/$id' | '/verify/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/certificate'
+    | '/records'
+    | '/records/$id'
+    | '/verify/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CertificateRoute: typeof CertificateRoute
   RecordsRoute: typeof RecordsRouteWithChildren
+  VerifyIdRoute: typeof VerifyIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,6 +91,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/certificate': {
+      id: '/certificate'
+      path: '/certificate'
+      fullPath: '/certificate'
+      preLoaderRoute: typeof CertificateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/records': {
@@ -80,6 +113,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/records/$id'
       preLoaderRoute: typeof RecordsIdRouteImport
       parentRoute: typeof RecordsRoute
+    }
+    '/verify/$id': {
+      id: '/verify/$id'
+      path: '/verify/$id'
+      fullPath: '/verify/$id'
+      preLoaderRoute: typeof VerifyIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -97,7 +137,9 @@ const RecordsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CertificateRoute: CertificateRoute,
   RecordsRoute: RecordsRouteWithChildren,
+  VerifyIdRoute: VerifyIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

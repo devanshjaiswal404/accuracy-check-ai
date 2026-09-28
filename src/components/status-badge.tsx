@@ -1,12 +1,15 @@
 import { ShieldCheck } from "lucide-react";
 import { useLang } from "@/lib/i18n";
-import type { AuditStatus } from "@/lib/metrology";
+import type { VerificationStatus } from "@/types/metrology";
 import { cn } from "@/lib/utils";
 
-const styles: Record<AuditStatus, { key: string; cls: string; dot: string }> = {
-  COMPLIANT: { key: "status.compliant", cls: "border-pass/60 bg-pass-soft text-pass", dot: "bg-pass" },
-  "NON-COMPLIANT": { key: "status.noncompliant", cls: "border-fail/60 bg-fail-soft text-fail", dot: "bg-fail" },
-  REVIEW: { key: "status.review", cls: "border-warn/60 bg-warn-soft text-warn", dot: "bg-warn" },
+const styles: Record<VerificationStatus | string, { label: string; cls: string; dot: string }> = {
+  VERIFIED: { label: "VERIFIED & STAMPED", cls: "border-emerald-500/60 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },
+  REJECTED: { label: "REJECTED (TOLERANCE BREACH)", cls: "border-rose-500/60 bg-rose-500/10 text-rose-600 dark:text-rose-400", dot: "bg-rose-500" },
+  PENDING_INSPECTION: { label: "PENDING INSPECTION", cls: "border-amber-500/60 bg-amber-500/10 text-amber-600 dark:text-amber-400", dot: "bg-amber-500" },
+  EXPIRED: { label: "STAMPING EXPIRED", cls: "border-slate-500/60 bg-slate-500/10 text-slate-600 dark:text-slate-400", dot: "bg-slate-500" },
+  COMPLIANT: { label: "COMPLIANT", cls: "border-emerald-500/60 bg-emerald-500/10 text-emerald-600", dot: "bg-emerald-500" },
+  "NON-COMPLIANT": { label: "NON-COMPLIANT", cls: "border-rose-500/60 bg-rose-500/10 text-rose-600", dot: "bg-rose-500" },
 };
 
 export function StatusBadge({
@@ -14,12 +17,11 @@ export function StatusBadge({
   size = "sm",
   className,
 }: {
-  status: AuditStatus;
+  status: VerificationStatus | string;
   size?: "sm" | "lg";
   className?: string;
 }) {
-  const { t } = useLang();
-  const s = styles[status] ?? styles.REVIEW;
+  const s = styles[status] ?? styles.PENDING_INSPECTION;
   return (
     <span
       className={cn(
@@ -30,7 +32,7 @@ export function StatusBadge({
       )}
     >
       <span className={cn("h-2 w-2 rounded-full", s.dot)} />
-      {t(s.key)}
+      {s.label}
     </span>
   );
 }
@@ -44,7 +46,7 @@ export function OfficerChip({ className }: { className?: string }) {
         className,
       )}
     >
-      <ShieldCheck className="h-3.5 w-3.5 text-pass" />
+      <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
       {t("officer.badge")}
     </span>
   );

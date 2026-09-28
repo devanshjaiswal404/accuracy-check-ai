@@ -4,16 +4,17 @@ import { Index } from "@/pages/Index";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MetrologyCheck AI — Legal Metrology & NPPA Enforcement" },
+      { title: "SatyaMaap 360 — Weights & Measures Verification & Stamping (Sec 24)" },
       {
         name: "description",
         content:
-          "Legal Metrology (LMPC Rules 2011) and NPPA DPCO 2013 inspection, e-commerce surveillance & Form V enforcement platform.",
+          "Online Verification and Lifecycle Management System for Weighing and Measuring Instruments under Section 24 of the Legal Metrology Act, 2009.",
       },
-      { property: "og:title", content: "MetrologyCheck AI — Legal Metrology & NPPA Enforcement" },
+      { property: "og:title", content: "SatyaMaap 360 — Weights & Measures Verification & Stamping" },
       {
         property: "og:description",
-        content: "Statutory pack-label audits, DPCO pricing compliance, e-commerce surveillance and Form V seizure memorandums.",
+        content:
+          "Statutory testing, MPE calculation, digital verification certificates, and lifecycle tracking for commercial weighing instruments.",
       },
       { property: "og:type", content: "website" },
     ],

@@ -87,6 +87,80 @@ export type Database = {
           total_violations?: number | null
         }
         Relationships: []
+      },
+      instruments: {
+        Row: {
+          accuracy_class: string
+          created_at: string
+          id: string
+          max_capacity: number
+          serial_number: string
+          stamping_fee: number
+          trader_name: string
+          verification_interval_e: number
+        }
+        Insert: {
+          accuracy_class: string
+          created_at?: string
+          id?: string
+          max_capacity: number
+          serial_number: string
+          stamping_fee?: number
+          trader_name: string
+          verification_interval_e: number
+        }
+        Update: {
+          accuracy_class?: string
+          created_at?: string
+          id?: string
+          max_capacity?: number
+          serial_number?: string
+          stamping_fee?: number
+          trader_name?: string
+          verification_interval_e?: number
+        }
+        Relationships: []
+      },
+      inspections: {
+        Row: {
+          applied_load: number
+          created_at: string
+          id: string
+          inspector_id: string
+          instrument_id: string
+          mpe_status: string
+          observed_load: number
+          test_type: string
+        }
+        Insert: {
+          applied_load: number
+          created_at?: string
+          id?: string
+          inspector_id: string
+          instrument_id: string
+          mpe_status: string
+          observed_load: number
+          test_type: string
+        }
+        Update: {
+          applied_load?: number
+          created_at?: string
+          id?: string
+          inspector_id?: string
+          instrument_id?: string
+          mpe_status?: string
+          observed_load?: number
+          test_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspections_instrument_id_fkey"
+            columns: ["instrument_id"]
+            isOneToOne: false
+            referencedRelation: "instruments"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

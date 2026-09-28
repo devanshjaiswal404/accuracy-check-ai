@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LanguageProvider } from "@/lib/i18n";
 import { TopBar } from "@/components/top-bar";
+import { supabase } from "@/lib/supabaseClient";
 
 function NotFoundComponent() {
   return (
@@ -82,25 +83,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "MetrologyCheck AI — Legal Metrology Division" },
+      { title: "SatyaMaap 360 — Weights & Measures Verification Portal (Section 24)" },
       {
         name: "description",
         content:
-          "Legal Metrology (Packaged Commodities) Rules 2011 compliance inspection platform for enforcement officers.",
+          "Online Verification and Lifecycle Management System for Weighing and Measuring Instruments under Section 24 of the Legal Metrology Act, 2009.",
       },
-      { property: "og:title", content: "MetrologyCheck AI — Legal Metrology Division" },
+      { property: "og:title", content: "SatyaMaap 360 — Legal Metrology Division" },
       {
         property: "og:description",
         content:
-          "Statutory pack-label audits under the LMPC Rules 2011: clause checklist, violation tagging, registry and PDF notices.",
+          "Section 24 statutory calibration, verification, stamping, and lifecycle management for weighing and measuring instruments.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "MetrologyCheck AI — Legal Metrology Division" },
+      { name: "twitter:title", content: "SatyaMaap 360 — Legal Metrology Division" },
       {
         name: "twitter:description",
         content:
-          "Legal Metrology (Packaged Commodities) Rules 2011 compliance inspection platform for enforcement officers.",
+          "Online Verification and Lifecycle Management System for Weighing and Measuring Instruments under Section 24 of the Legal Metrology Act, 2009.",
       },
     ],
     links: [
@@ -137,6 +138,25 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    async function verifyAuthConnection() {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.warn("[Supabase Auth] Session fetch error:", error.message);
+        } else {
+          console.log(
+            "[Supabase Auth] Connected successfully. Active session:",
+            data.session ? `User: ${data.session.user.id}` : "Anonymous / Guest"
+          );
+        }
+      } catch (err) {
+        console.warn("[Supabase Auth] Verification notice:", err);
+      }
+    }
+    verifyAuthConnection();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
@@ -146,7 +166,7 @@ function RootComponent() {
             <Outlet />
           </main>
           <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-4 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors">
-            MetrologyCheck AI · Packaged Commodities (LMPC) Rules, 2011 · For enforcement use only
+            SatyaMaap 360 · Department of Consumer Affairs · Section 24 Legal Metrology Act, 2009 · For official statutory use only
           </footer>
         </div>
         <Toaster theme="dark" position="bottom-right" />

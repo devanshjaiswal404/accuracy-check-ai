@@ -1,57 +1,90 @@
 import React, { useState, useEffect } from "react";
 import {
-  Scan,
-  Pill,
-  FileText,
   Scale,
-  CheckCircle2,
-  ArrowRight,
-  ShieldCheck,
-  Sparkles,
+  Building,
+  Crosshair,
+  Layers,
   Sun,
   Moon,
+  ShieldCheck,
+  CheckCircle2,
+  Award,
 } from "lucide-react";
-import { PhysicalPackageScanner } from "@/components/PhysicalPackageScanner";
-import { PharmaPricingAudit } from "@/components/PharmaPricingAudit";
-import { EnforcementRegistryAnalytics } from "@/components/EnforcementRegistryAnalytics";
+import { TraderPortal } from "@/components/instruments/TraderPortal";
+import { FieldLMOConsole } from "@/components/instruments/FieldLMOConsole";
+import { InstrumentLifecycleRegistry } from "@/components/instruments/InstrumentLifecycleRegistry";
+import { CertificateView } from "@/components/instruments/CertificateView";
+import type { InstrumentSpecs, InspectionSession } from "@/types/metrology";
 import { useLang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/supabaseClient";
+
+const DEFAULT_INITIAL_INSTRUMENT: InstrumentSpecs = {
+  id: 'inst-live-01',
+  applicationNo: 'SM360-2026-DEL-0891',
+  traderName: 'Rajesh Kumar Gupta',
+  businessName: 'Gupta Kirana & General Merchant',
+  tradeLicenseNo: 'DL-MCD-2024-99812',
+  address: 'Shop No. 14, Main Market, Lajpat Nagar II',
+  district: 'South East Delhi',
+  state: 'Delhi',
+  pincode: '110024',
+  instrumentType: 'ELECTRONIC_COUNTER_SCALE',
+  make: 'Essae-Teraoka',
+  model: 'DS-215N',
+  serialNumber: 'ES-2026-884129',
+  modelApprovalNo: 'IND/09/2021/412',
+  accuracyClass: 'CLASS_III',
+  maxCapacity: 30,
+  minCapacity: 0.1,
+  verificationInterval_e: 0.005,
+  scaleInterval_d: 0.005,
+  unit: 'kg',
+  verificationFee: 200,
+};
+
+const DEFAULT_INITIAL_CERTIFICATE: InspectionSession = {
+  instrument: DEFAULT_INITIAL_INSTRUMENT,
+  officerName: 'Devansh Jaiswal',
+  officerBadge: 'LMO-DL-CENTRAL-042',
+  jurisdictionZone: 'Delhi Zone-1 (South East)',
+  verificationType: 'PERIODIC_REVERIFICATION',
+  inspectionDate: new Date().toISOString().split('T')[0],
+  nextDueDate: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
+  physicalConditionOk: true,
+  modelPlatePresent: true,
+  sealingProvisionIntact: true,
+  eccentricityTests: [],
+  repeatabilityTests: [],
+  linearityTests: [],
+  overallStatus: 'VERIFIED',
+  leadSealNumber: 'IND-DL-26-LS-89410',
+  hologramNumber: 'HG-2026-99124',
+  certificateNumber: 'LM/DL/SEC24/2026/04812',
+  stampingFeePaid: 200,
+};
 
 const t = {
   en: {
-    appTitle: "MetrologyCheck AI — Legal Metrology & NPPA Enforcement",
-    enforcementActive: "Enforcement Active: Central Zone",
+    appTitle: "SatyaMaap 360 — Weights & Measures Lifecycle Management",
+    enforcementActive: "Section 24 Statutory Verification: Active",
     tabs: {
-      physical: "Physical Package Scanner",
-      pharma: "Pharma DPCO Audit",
-      registry: "Enforcement Registry & Analytics",
-    },
-    workflow: {
-      step1: "Select or Upload Packaging Specimen",
-      step1Desc: "Drag & drop pack photo or capture via live device camera",
-      step2: "AI Audits Statutory Rules & Stamping",
-      step2Desc: "Checks MRP, Net Qty, USP, Inkjet & DPCO Ceiling in real time",
-      step3: "Review Violations & Issue Form V Notice",
-      step3Desc: "Verify bounding boxes and export court-ready legal seizure PDF",
+      trader: "Trader e-Filing & Onboarding",
+      lmo: "Field LMO Testing Console",
+      registry: "Instrument Lifecycle Registry",
+      certificate: "Digital Certificate (DVC)",
     },
     toggleEn: "EN",
     toggleHi: "HI",
   },
   hi: {
-    appTitle: "विधिक मापविज्ञान एवं एनपीपीए प्रवर्तन प्रणाली",
-    enforcementActive: "प्रवर्तन सक्रिय: केंद्रीय क्षेत्र",
+    appTitle: "सत्यमाप 360 — तौल एवं माप उपकरण जीवनचक्र प्रबंधन",
+    enforcementActive: "धारा 24 सांविधिक सत्यापन: सक्रिय",
     tabs: {
-      physical: "पैकेज सामग्री स्कैनर",
-      pharma: "दवा मूल्य नियंत्रण (DPCO) जांच",
-      registry: "निरीक्षण रिकॉर्ड और विश्लेषिकी",
-    },
-    workflow: {
-      step1: "पैकेजिंग नमूना चुनें या अपलोड करें",
-      step1Desc: "पैकेट का फोटो अपलोड करें या डिवाइस कैमरा से फोटो लें",
-      step2: "एआई वैधानिक नियमों और स्टैम्पिंग की जांच करता है",
-      step2Desc: "MRP, शुद्ध मात्रा, USP, इंकजेट व DPCO सीलिंग की तत्काल जांच",
-      step3: "उल्लंघनों की समीक्षा करें और फॉर्म V नोटिस जारी करें",
-      step3Desc: "बाउंडिंग बॉक्स सत्यापित करें और अदालत-योग्य जब्ती PDF निर्यात करें",
+      trader: "व्यापारी ई-फाइलिंग व पंजीकरण",
+      lmo: "फील्ड LMO परीक्षण कंसोल",
+      registry: "उपकरण जीवनचक्र रजिस्टर",
+      certificate: "डिजिटल प्रमाण पत्र (DVC)",
     },
     toggleEn: "EN",
     toggleHi: "HI",
@@ -65,8 +98,123 @@ export function Index() {
   );
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
+  const [activeModule, setActiveModule] = useState<
+    "trader-onboarding" | "lmo-console" | "lifecycle-registry" | "certificate-view"
+  >("lmo-console");
+
+  // Registry state
+  const [instruments, setInstruments] = useState<InstrumentSpecs[]>([DEFAULT_INITIAL_INSTRUMENT]);
+  const [sessions, setSessions] = useState<InspectionSession[]>([DEFAULT_INITIAL_CERTIFICATE]);
+  const [selectedForInspection, setSelectedForInspection] = useState<InstrumentSpecs | null>(
+    DEFAULT_INITIAL_INSTRUMENT
+  );
+  const [activeCertSession, setActiveCertSession] = useState<InspectionSession>(DEFAULT_INITIAL_CERTIFICATE);
+
+  // Live database fetch from Supabase
   useEffect(() => {
-    const savedTheme = (localStorage.getItem("mc-theme") as "dark" | "light") || "dark";
+    async function loadLiveSupabaseData() {
+      try {
+        // Fetch registered instruments
+        const { data: instData } = await supabase
+          .from("instruments")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (instData && instData.length > 0) {
+          const mappedInst: InstrumentSpecs[] = instData.map((r) => ({
+            id: r.id,
+            applicationNo: `SM360-${r.serial_number}`,
+            traderName: r.trader_name,
+            businessName: r.business_name || `${r.trader_name} Firm`,
+            tradeLicenseNo: r.trade_license_no || "DL-MCD-2025-REG",
+            address: r.address || "Commercial Premises",
+            district: r.district || "Delhi Central",
+            state: r.state || "Delhi",
+            pincode: r.pincode || "110001",
+            instrumentType: (r.instrument_type as any) || "ELECTRONIC_COUNTER_SCALE",
+            make: r.make || "Standard",
+            model: r.model || "Scale-360",
+            serialNumber: r.serial_number,
+            modelApprovalNo: r.model_approval_no || "IND/01/2024/099",
+            accuracyClass: (r.accuracy_class as any) || "CLASS_III",
+            maxCapacity: Number(r.max_capacity) || 30,
+            minCapacity: Number(r.min_capacity) || 0.1,
+            verificationInterval_e: Number(r.verification_interval_e) || 0.005,
+            scaleInterval_d: Number(r.scale_interval_d) || 0.005,
+            unit: (r.unit as any) || "kg",
+            verificationFee: Number(r.stamping_fee) || 200,
+          }));
+          setInstruments(mappedInst);
+          setSelectedForInspection(mappedInst[0]);
+        }
+
+        // Fetch verified certificates
+        const { data: certData } = await supabase
+          .from("certificates")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (certData && certData.length > 0) {
+          const mappedCert: InspectionSession[] = certData.map((c) => ({
+            instrument: {
+              id: c.instrument_id,
+              applicationNo: `SM360-${c.serial_number}`,
+              traderName: c.trader_name,
+              businessName: c.business_name || `${c.trader_name} Firm`,
+              tradeLicenseNo: "DL-SEC24-LIC",
+              address: "Commercial Premises",
+              district: c.zone || "Central Delhi",
+              state: "Delhi",
+              pincode: "110001",
+              instrumentType: "ELECTRONIC_COUNTER_SCALE",
+              make: "Standard Certified",
+              model: "SC-360",
+              serialNumber: c.serial_number,
+              modelApprovalNo: "IND/01/2024/099",
+              accuracyClass: "CLASS_III",
+              maxCapacity: 30,
+              minCapacity: 0.1,
+              verificationInterval_e: 0.005,
+              scaleInterval_d: 0.005,
+              unit: "kg",
+              verificationFee: Number(c.stamping_fee_paid || 200),
+            },
+            officerName: c.inspector_name || "Devansh Jaiswal",
+            officerBadge: c.inspector_badge || "LMO-DL-CENTRAL-042",
+            jurisdictionZone: c.zone || "Delhi Zone-1",
+            verificationType: "PERIODIC_REVERIFICATION",
+            inspectionDate: c.approval_date,
+            nextDueDate: c.expiry_date,
+            physicalConditionOk: true,
+            modelPlatePresent: true,
+            sealingProvisionIntact: true,
+            eccentricityTests: [],
+            repeatabilityTests: [],
+            linearityTests: [],
+            overallStatus: (c.verification_status as any) || "VERIFIED",
+            leadSealNumber: c.lead_seal_number,
+            hologramNumber: c.hologram_number,
+            certificateNumber: c.certificate_number,
+            stampingFeePaid: Number(c.stamping_fee_paid || 200),
+            sealImageUrl: c.seal_image_url,
+            gpsCoordinates: c.gps_latitude && c.gps_longitude ? {
+              latitude: Number(c.gps_latitude),
+              longitude: Number(c.gps_longitude),
+              accuracy: 10,
+            } : undefined,
+          }));
+          setSessions(mappedCert);
+          setActiveCertSession(mappedCert[0]);
+        }
+      } catch (err) {
+        console.warn("Live Supabase fetch notice:", err);
+      }
+    }
+    loadLiveSupabaseData();
+  }, []);
+
+  useEffect(() => {
+    const savedTheme = (localStorage.getItem("sm-theme") as "dark" | "light") || "dark";
     setTheme(savedTheme);
     if (savedTheme === "dark") {
       document.documentElement.classList.add("dark");
@@ -78,7 +226,7 @@ export function Index() {
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
-    localStorage.setItem("mc-theme", nextTheme);
+    localStorage.setItem("sm-theme", nextTheme);
     if (nextTheme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
@@ -101,14 +249,26 @@ export function Index() {
 
   const currentT = t[language];
 
-  const [activeModule, setActiveModule] = useState<
-    "physical-scanner" | "pharma-dpco" | "enforcement-registry"
-  >("physical-scanner");
+  // Callback when a trader registers an instrument
+  const handleRegisterInstrument = (inst: InstrumentSpecs) => {
+    setInstruments((prev) => [inst, ...prev]);
+  };
+
+  // Callback to transition directly from trader form to inspection
+  const handleSendToInspection = (inst: InstrumentSpecs) => {
+    setSelectedForInspection(inst);
+    setActiveModule("lmo-console");
+  };
+
+  // Callback when inspection is stamped & certified
+  const handleInspectionCompleted = (session: InspectionSession) => {
+    setSessions((prev) => [session, ...prev]);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        {/* 1. Simplified & Clean Header */}
+        {/* Header Bar */}
         <header className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white/80 p-4 sm:p-5 shadow-sm backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80">
           <div className="flex items-center gap-3.5">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30 ring-1 ring-indigo-500/50">
@@ -119,7 +279,6 @@ export function Index() {
                 {currentT.appTitle}
               </h1>
               <div className="mt-1 flex items-center gap-2">
-                {/* Sleek Live Status Chip with Glowing Green Dot */}
                 <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-0.5 text-xs font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 shadow-sm">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
@@ -131,9 +290,8 @@ export function Index() {
             </div>
           </div>
 
-          {/* Controls: Theme Toggle & Language Toggle */}
+          {/* Theme & Language Controls */}
           <div className="flex items-center gap-2.5">
-            {/* Sleek Sun / Moon Toggle */}
             <button
               type="button"
               onClick={toggleTheme}
@@ -148,7 +306,6 @@ export function Index() {
               )}
             </button>
 
-            {/* Polished Segmented Pill Language Toggle [ EN | HI ] */}
             <div
               className="inline-flex overflow-hidden rounded-full border border-slate-200 bg-slate-100 p-0.5 shadow-inner ring-1 ring-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:ring-slate-800/80"
               role="group"
@@ -182,112 +339,103 @@ export function Index() {
           </div>
         </header>
 
-        {/* 2. Soft Rounded Navigation Tabs */}
+        {/* Navigation Tabs */}
         <div className="mb-6 flex flex-wrap items-center gap-2.5 border-b border-slate-200 dark:border-slate-800 pb-4">
-          {/* Tab 1: Physical Package Scanner */}
+          {/* Tab 1: Field LMO Console */}
           <button
             type="button"
-            onClick={() => setActiveModule("physical-scanner")}
+            onClick={() => setActiveModule("lmo-console")}
             className={cn(
               "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 font-display text-sm font-semibold tracking-wide transition-all duration-150",
-              activeModule === "physical-scanner"
+              activeModule === "lmo-console"
                 ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 border-transparent"
                 : "bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
             )}
           >
-            <Scan className="h-4 w-4" />
-            {currentT.tabs.physical}
+            <Crosshair className="h-4 w-4" />
+            {currentT.tabs.lmo}
           </button>
 
-          {/* Tab 2: Pharma DPCO Audit */}
+          {/* Tab 2: Trader e-Filing */}
           <button
             type="button"
-            onClick={() => setActiveModule("pharma-dpco")}
+            onClick={() => setActiveModule("trader-onboarding")}
             className={cn(
               "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 font-display text-sm font-semibold tracking-wide transition-all duration-150",
-              activeModule === "pharma-dpco"
+              activeModule === "trader-onboarding"
                 ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 border-transparent"
                 : "bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
             )}
           >
-            <Pill className="h-4 w-4" />
-            {currentT.tabs.pharma}
+            <Building className="h-4 w-4" />
+            {currentT.tabs.trader}
           </button>
 
-          {/* Tab 3: Enforcement Registry & Analytics */}
+          {/* Tab 3: Instrument Lifecycle Registry */}
           <button
             type="button"
-            onClick={() => setActiveModule("enforcement-registry")}
+            onClick={() => setActiveModule("lifecycle-registry")}
             className={cn(
               "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 font-display text-sm font-semibold tracking-wide transition-all duration-150",
-              activeModule === "enforcement-registry"
+              activeModule === "lifecycle-registry"
                 ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 border-transparent"
                 : "bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
             )}
           >
-            <FileText className="h-4 w-4" />
+            <Layers className="h-4 w-4" />
             {currentT.tabs.registry}
           </button>
+
+          {/* Tab 4: Digital Verification Certificate (DVC) */}
+          <button
+            type="button"
+            onClick={() => setActiveModule("certificate-view")}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 font-display text-sm font-semibold tracking-wide transition-all duration-150",
+              activeModule === "certificate-view"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 border-transparent"
+                : "bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
+            )}
+          >
+            <Award className="h-4 w-4" />
+            {currentT.tabs.certificate}
+          </button>
         </div>
 
-        {/* 3. Guided "How it Works" 3-Step Onboarding Strip */}
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            {/* Step 1 */}
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800/60 dark:bg-slate-950/50">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800 font-display text-xs font-bold">
-                1
-              </div>
-              <div className="min-w-0">
-                <div className="font-display text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
-                  {currentT.workflow.step1}
-                </div>
-                <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                  {currentT.workflow.step1Desc}
-                </p>
-              </div>
-            </div>
+        {/* Tab Modules */}
+        <div className="transition-opacity duration-200">
+          {activeModule === "lmo-console" && (
+            <FieldLMOConsole
+              selectedInstrument={selectedForInspection}
+              onInspectionCompleted={handleInspectionCompleted}
+            />
+          )}
 
-            {/* Step 2 */}
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800/60 dark:bg-slate-950/50">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800 font-display text-xs font-bold">
-                2
-              </div>
-              <div className="min-w-0">
-                <div className="font-display text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
-                  {currentT.workflow.step2}
-                </div>
-                <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                  {currentT.workflow.step2Desc}
-                </p>
-              </div>
-            </div>
+          {activeModule === "trader-onboarding" && (
+            <TraderPortal
+              onRegisterInstrument={handleRegisterInstrument}
+              onSendToInspection={handleSendToInspection}
+            />
+          )}
 
-            {/* Step 3 */}
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800/60 dark:bg-slate-950/50">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800 font-display text-xs font-bold">
-                3
-              </div>
-              <div className="min-w-0">
-                <div className="font-display text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
-                  {currentT.workflow.step3}
-                </div>
-                <p className="font-mono text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                  {currentT.workflow.step3Desc}
-                </p>
-              </div>
-            </div>
-          </div>
+          {activeModule === "lifecycle-registry" && (
+            <InstrumentLifecycleRegistry
+              sessions={sessions}
+              onOpenInspection={handleSendToInspection}
+              onOpenFullCertificate={(session) => {
+                setActiveCertSession(session);
+                setActiveModule("certificate-view");
+              }}
+            />
+          )}
+
+          {activeModule === "certificate-view" && (
+            <CertificateView
+              session={activeCertSession || sessions[0] || INITIAL_INSPECTIONS[0]}
+              onBack={() => setActiveModule("lifecycle-registry")}
+            />
+          )}
         </div>
-
-        {/* 4. Active Module View */}
-        {activeModule === "physical-scanner" ? (
-          <PhysicalPackageScanner />
-        ) : activeModule === "pharma-dpco" ? (
-          <PharmaPricingAudit />
-        ) : (
-          <EnforcementRegistryAnalytics />
-        )}
       </div>
     </div>
   );
